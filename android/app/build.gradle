@@ -1,0 +1,112 @@
+apply plugin: "com.android.application"
+
+import com.android.build.OutputFile
+
+project.ext.react = [
+        entryFile: "index.js"
+]
+
+apply from: "../../node_modules/react-native/react.gradle"
+
+/**
+ * Set this to true to create two separate APKs instead of one:
+ *   - An APK that only works on ARM devices
+ *   - An APK that only works on x86 devices
+ * The advantage is the size of the APK is reduced by about 4MB.
+ * Upload all the APKs to the Play Store and people will download
+ * the correct one based on the CPU architecture of their device.
+ */
+def enableSeparateBuildPerCPUArchitecture = false
+
+/**
+ * Run Proguard to shrink the Java bytecode in release builds.
+ */
+def enableProguardInReleaseBuilds = false
+
+android {
+    signingConfigs {
+        config {
+            keyAlias 'weather'
+            keyPassword '123456'
+            storeFile file('F:/ReactNative/ReactWeather/android/keystores/weather.jks')
+            storePassword '123456'
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion "25.0.3"
+    defaultConfig {
+        applicationId "com.reactweather"
+        minSdkVersion 16
+        targetSdkVersion 25
+        versionCode 1
+        versionName "1.0"
+        ndk {
+            abiFilters "armeabi-v7a", "x86"
+        }
+    }
+    splits {
+        abi {
+            reset()
+            enable enableSeparateBuildPerCPUArchitecture
+            universalApk false  // If true, also generate a universal APK
+            include "armeabi-v7a", "x86"
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.config
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+        debug{
+            minifyEnabled false
+            signingConfig signingConfigs.config
+        }
+    }
+    // applicationVariants are e.g. debug, release
+    applicationVariants.all { variant ->
+        variant.outputs.each { output ->
+            // For each separate APK per architecture, set a unique version code as described here:
+            // http://tools.android.com/tech-docs/new-build-system/user-guide/apk-splits
+            def versionCodes = ["armeabi-v7a": 1, "x86": 2]
+            def abi = output.getFilter(OutputFile.ABI)
+            if (abi != null) {  // null for the universal-debug, universal-release variants
+                output.versionCodeOverride =
+                        versionCodes.get(abi) * 1048576 + defaultConfig.versionCode
+            }
+        }
+    }
+    //useLibrary 'org.apache.http.legacy'
+}
+repositories {
+    flatDir {
+        dirs 'libs'
+    }
+}
+
+ext {
+    supportVersion = "25.3.1"
+}
+dependencies {
+    compile project(':react-native-linear-gradient')
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:25.3.1'
+    compile 'com.facebook.react:react-native:+'
+    compile 'com.google.code.gson:gson:2.8.2'
+    compile(name: 'bmob-sdk-3.5.7', ext: 'aar')
+    compile 'com.yanzhenjie:album:1.0.7'
+    compile 'com.yanzhenjie:durban:1.0.1'
+    compile files('libs/AMap_Location_V2.4.0_20160308.jar')
+    compile files('libs/com.baidu.speechsynthesizer_1.1.3.jar')
+    compile files('libs/glide-3.6.1.jar')
+    compile files('libs/galaxy_lite.jar')
+    compile 'com.facebook.fresco:animated-gif:1.3.0'
+    compile 'com.facebook.fresco:animated-base-support:1.3.0'
+}
+
+// Run this once to be able to run the application with BUCK
+// puts all compile dependencies into folder libs for BUCK to use
+task copyDownloadableDepsToLibs(type: Copy) {
+    from configurations.compile
+    into 'libs'
+}

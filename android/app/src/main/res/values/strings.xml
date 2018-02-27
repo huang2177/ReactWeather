@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">小马天气</string>
+    <string name="user_name">马儿%s</string>
+    <string name="uploading_image">正在上传图片…</string>
+    <string name="publish_success">成功发布到%s</string>
+</resources>
